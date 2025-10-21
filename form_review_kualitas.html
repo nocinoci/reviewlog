@@ -183,9 +183,9 @@
         };
         // =========================================================================
         
-        // Fallback: Gunakan konfigurasi Canvas jika ada, jika tidak gunakan konfigurasi manual
-        const appId = typeof __app_id !== 'undefined' ? __app_id : MY_FIREBASE_CONFIG.projectId;
+        // **PERBAIKAN FUNGSI 1**: Gunakan konfigurasi manual jika tidak berada di lingkungan Canvas.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : MY_FIREBASE_CONFIG;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : MY_FIREBASE_CONFIG.projectId;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
 
         let db, auth, userId = null;
@@ -338,7 +338,7 @@
             }
 
             try {
-                setLogLevel('debug');
+                // setLogLevel('debug'); // Uncomment ini untuk debugging
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
@@ -377,7 +377,8 @@
             } catch (error) {
                 console.error("Kesalahan saat inisialisasi Firebase atau otentikasi:", error);
                 
-                systemStatus.textContent = "Gagal menyambung ke Firebase. Lihat konsol.";
+                // Pastikan pesan error yang lebih detail dicatat di konsol
+                systemStatus.textContent = "Gagal menyambung ke Firebase. Lihat konsol untuk detail error.";
                 systemStatus.classList.remove('bg-yellow-100', 'text-yellow-800');
                 systemStatus.classList.add('bg-red-100', 'text-red-800');
                 submitButton.disabled = true;
