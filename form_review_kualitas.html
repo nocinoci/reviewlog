@@ -255,11 +255,27 @@
 
         // FUNGSI 3: Inisialisasi Firebase dan Otentikasi
         async function initializeFirebaseAndAuth() {
+            
+            // 1. Memuat semua item review visual
+            visualReviewContainer.innerHTML = visualItems.map(generateReviewItem).join('');
+            
+            // 2. Pasang listener untuk pembaruan skor real-time
+            document.querySelectorAll('.rating-select').forEach(select => {
+                select.addEventListener('change', updateAverageScore);
+            });
+            
+            // Panggil sekali untuk memastikan tampilan skor awal
+            updateAverageScore();
+            
+            // 3. Pasang listener untuk pengiriman formulir
+            reviewForm.addEventListener('submit', handleSubmit);
+
             if (!firebaseConfig || !firebaseConfig.projectId) {
                 console.error("Kesalahan: Konfigurasi Firebase tidak ada. Harap ganti placeholder MY_FIREBASE_CONFIG di dalam kode.");
-                outputMessage.textContent = "Gagal memulai: Harap isi konfigurasi Firebase Anda (API Key, Project ID, dll.)";
+                // Tetap render UI, tetapi beri peringatan
+                outputMessage.textContent = "Peringatan: Konfigurasi Firebase TIDAK LENGKAP. Data tidak akan tersimpan.";
                 outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300');
-                outputMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+                outputMessage.classList.add('bg-yellow-100', 'text-yellow-700', 'border-yellow-300');
                 return;
             }
 
@@ -292,20 +308,6 @@
                         resolve();
                     });
                 });
-
-                // 1. Memuat semua item review visual
-                visualReviewContainer.innerHTML = visualItems.map(generateReviewItem).join('');
-                
-                // 2. Pasang listener untuk pembaruan skor real-time
-                document.querySelectorAll('.rating-select').forEach(select => {
-                    select.addEventListener('change', updateAverageScore);
-                });
-                
-                // Panggil sekali untuk memastikan tampilan skor awal
-                updateAverageScore();
-                
-                // 3. Pasang listener untuk pengiriman formulir
-                reviewForm.addEventListener('submit', handleSubmit);
                 
             } catch (error) {
                 console.error("Kesalahan saat inisialisasi Firebase atau otentikasi:", error);
@@ -317,9 +319,16 @@
             event.preventDefault(); 
             
             if (!userId || !db) {
-                console.error("Pengguna belum diautentikasi atau Firebase belum siap.");
-                outputMessage.textContent = "Gagal mengirim: Harap tunggu sebentar sampai sistem siap atau muat ulang.";
-                outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300');
+                // Periksa apakah Firebase sudah siap sebelum mencoba menyimpan
+                if (firebaseConfig.projectId) {
+                    console.error("Pengguna belum diautentikasi atau Firebase belum siap.");
+                    outputMessage.textContent = "Gagal mengirim: Harap tunggu sebentar sampai sistem siap atau muat ulang.";
+                } else {
+                    // Jika konfigurasi tidak ada sama sekali, tampilkan pesan yang lebih jelas
+                    outputMessage.textContent = "Gagal mengirim: Konfigurasi Firebase tidak valid.";
+                }
+                
+                outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300', 'bg-yellow-100', 'text-yellow-700', 'border-yellow-300');
                 outputMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
                 outputMessage.scrollIntoView({ behavior: 'smooth' });
                 return;
