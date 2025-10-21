@@ -183,7 +183,7 @@
             googleSheetWebAppUrl: "https://script.google.com/macros/s/AKfycbyvH6ihucsb78Uveat7Uzd2ITd-FX0AobcP84S6XSx_9CD7fBJcMJglKa52-bTy8KUa/exec", 
 
             // URL WEB APP GAS BARU UNTUK GOOGLE DOCS (DIPEROLEH DARI LANGKAH 1)
-            googleDocWebAppUrl: "GANTI_DENGAN_URL_WEB_APP_DOCS_ANDA", 
+            googleDocWebAppUrl: "https://script.google.com/macros/s/AKfycbzEgybvBK2h0KutOUf2iWgHD92AQsndCvge6VqP_O9uXKBl7TAkFQkCbDLbc5axMXAY/exec", 
         };
         // =========================================================================
         
@@ -531,7 +531,7 @@
                 message = `✅ REVIEW BERHASIL DISIMPAN! Dokumen Laporan: <a href="${finalDocLink}" target="_blank" class="text-blue-700 underline font-bold hover:text-blue-900">Lihat Google Doc</a>`;
                 colorClass = 'bg-green-100 text-green-700 border-green-300';
             } else if (firestoreSuccess && !docSuccess) {
-                message = `⚠️ REVIEW BERHASIL DISIMPAN ke Firebase, tetapi GAGAL membuat Google Doc. (Skor: ${finalAverageScore}). Cek log Apps Script Anda.`;
+                message = `⚠️ REVIEW BERHASIL DISIMPAN ke Firebase, tetapi GAGAL membuat Google Doc. (Skor: ${finalAverageScore.toFixed(2)}). Cek log Apps Script Anda.`;
                 colorClass = 'bg-yellow-100 text-yellow-700 border-yellow-300';
             } else {
                 message = `❌ Gagal menyimpan data (Firebase dan Google Doc). Harap periksa koneksi atau konfigurasi Firebase.`;
