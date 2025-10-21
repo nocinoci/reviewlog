@@ -352,9 +352,22 @@
                     await signInAnonymously(auth);
                 }
 
-                // Tunggu otentikasi selesai
-                await new Promise(resolve => {
-                    const unsubscribe = onAuthStateChanged(auth, (user) => {
+                // Tunggu otentikasi selesai (Maksimal 10 detik)
+                await new Promise((resolve, reject) => {
+                    // Set timeout agar proses tidak menggantung selamanya
+                    const timeout = setTimeout(() => {
+                        // Hentikan listener
+                        if (unsubscribe) unsubscribe(); 
+                        reject(new Error("Firebase initialization timed out after 10 seconds. Check Authorized Domains in Firebase Console."));
+                    }, 10000); // 10 detik
+
+                    let unsubscribe; // Deklarasikan di luar sehingga bisa diakses oleh timeout
+                    
+                    // Gunakan onAuthStateChanged untuk menangkap state akhir
+                    unsubscribe = onAuthStateChanged(auth, (user) => {
+                        clearTimeout(timeout);
+                        unsubscribe(); // Hentikan listener setelah pemicu pertama
+                        
                         if (user) {
                             userId = user.uid;
                             
@@ -365,12 +378,13 @@
                             systemStatus.classList.add('hidden');
                             
                             console.log("Firebase Auth berhasil. User ID:", userId);
+                            resolve(); // Selesaikan Promise
                         } else {
-                            // Jika token gagal, user ID akan tetap menjadi anonim.
+                            // Jika gagal sign-in, kita tetap menyelesaikan Promise, 
+                            // tetapi error seharusnya sudah ditangkap oleh try/catch di level atas
                             userId = auth.currentUser?.uid || `anon-${crypto.randomUUID()}`;
+                            resolve(); 
                         }
-                        unsubscribe();
-                        resolve();
                     });
                 });
                 
@@ -378,7 +392,8 @@
                 console.error("Kesalahan saat inisialisasi Firebase atau otentikasi:", error);
                 
                 // Pastikan pesan error yang lebih detail dicatat di konsol
-                systemStatus.textContent = "Gagal menyambung ke Firebase. Lihat konsol untuk detail error.";
+                // Error dari timeout akan langsung tercatat di sini.
+                systemStatus.textContent = `Gagal menyambung: ${error.message}. Lihat konsol.`;
                 systemStatus.classList.remove('bg-yellow-100', 'text-yellow-800');
                 systemStatus.classList.add('bg-red-100', 'text-red-800');
                 submitButton.disabled = true;
@@ -519,4 +534,3 @@
     </script>
 </body>
 </html>
-
