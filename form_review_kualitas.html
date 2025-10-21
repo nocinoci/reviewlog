@@ -6,20 +6,17 @@
     <title>Formulir Review Kualitas Sampel Karung</title>
     <!-- Memuat Tailwind CSS untuk styling modern dan responsif -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* Menggunakan font Inter */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Light blue background */
+            background-color: #f0f4f8; 
         }
     </style>
 </head>
 <body class="p-4 sm:p-8">
 
-    <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-xl">
+    <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-lg">
         <header class="mb-8 border-b-4 border-blue-600 pb-4">
             <h1 class="text-4xl font-black text-gray-800">
                 Formulir Penilaian Kualitas Sampel Karung Terigu
@@ -78,9 +75,11 @@
                     I. Review Visual dan Teknis Kemasan
                 </h2>
 
+                <!-- Bagian A, B, C akan menggunakan fungsi generateReviewItem -->
                 <div id="visualReviewItems" class="space-y-6">
                     <!-- Item Review akan dimasukkan di sini oleh JS -->
                 </div>
+
             </section>
             
             <!-- KATEGORI II: KELENGKAPAN DOKUMEN -->
@@ -109,13 +108,18 @@
                         </div>
                     </div>
                 </div>
+
             </section>
 
             <!-- CARD SKOR RATA-RATA -->
             <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-lg shadow-xl flex justify-between items-center transition duration-300 hover:bg-blue-100 mx-auto max-w-full">
-                <p class="text-lg font-bold text-blue-800">TOTAL NILAI RATA-RATA (Bagian I):</p>
+                <div>
+                    <p class="text-lg font-bold text-blue-800">TOTAL NILAI RATA-RATA (Bagian I):</p>
+                    <p class="text-sm text-gray-500">Maks 5</p>
+                </div>
                 <span id="averageScoreDisplay" class="text-4xl font-extrabold text-blue-900 bg-white px-4 py-2 rounded-lg shadow-inner min-w-[120px] text-right">0.00</span>
             </div>
+
 
             <!-- KATEGORI III: REKOMENDASI DAN TINDAK LANJUT -->
             <section class="space-y-4 pt-6 border-t border-gray-300">
@@ -128,8 +132,8 @@
                         
                         <!-- Rekomendasi (Dropdown) -->
                         <div>
-                            <label for="recommendation_status" class="block text-sm font-medium text-gray-700 mb-1">Rekomendasi</label>
-                            <select id="recommendation_status" name="recommendation" required
+                            <label for="recommendation" class="block text-sm font-medium text-gray-700 mb-1">Rekomendasi</label>
+                            <select id="recommendation" name="recommendation" required
                                     class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 bg-white">
                                 <option value="" disabled selected>-- Pilih Tindak Lanjut --</option>
                                 <option value="Lolos">Lolos</option>
@@ -146,16 +150,17 @@
                         </div>
                     </div>
                 </div>
+
             </section>
 
             <!-- Tombol Kirim -->
-            <button type="submit" id="submitButton" disabled class="w-full bg-gray-400 text-white font-bold py-3 rounded-xl mt-8 cursor-not-allowed transition-all duration-300 ease-in-out">
+            <button type="submit" id="submitButton" disabled class="w-full bg-gray-400 text-white font-bold py-3 rounded-xl mt-8 cursor-not-allowed">
                 KIRIMKAN REVIEW & SIMPAN DATA
             </button>
         </form>
 
         <!-- Area Pesan/Output -->
-        <div id="outputMessage" class="hidden mt-8 p-4 rounded-xl font-semibold border shadow-inner">
+        <div id="outputMessage" class="hidden mt-8 p-4 bg-green-100 text-green-700 rounded-xl font-semibold border border-green-300 shadow-inner">
             <!-- Pesan sukses atau error akan ditampilkan di sini -->
         </div>
 
@@ -177,11 +182,8 @@
             messagingSenderId: "817094832497",
             appId: "1:817094832497:web:24f99fb36b3e1883f9c6d0",
             
-            // URL WEB APP GOOGLE SHEET (PASTIKAN SUDAH BERAKHIR /exec)
             googleSheetWebAppUrl: "https://script.google.com/macros/s/AKfycbwKpsgmibj52obEBjsAwLwiC5KiDt9-DNzopsEIpsZD4-7_Fo80G_5MPo0ptPLqzm6uiw/exec", 
-
-            // URL WEB APP GOOGLE DOCS (PASTIKAN SUDAH BERAKHIR /exec)
-            googleDocWebAppUrl: "https://script.google.com/macros/s/AKfycbwKpsgmibj52obEBjsAwLwiC5KiDt9-DNzopsEIpsZD4-7_Fo80G_5MPo0ptPLqzm6uiw/exec", 
+            googleDocWebAppUrl: "https://script.google.com/macros/s/AKfycbzEgybvBK2h0KutOUf2iWgHD92AQsndCvge6VqP_O9uXKBl7TAkFQkCbDLbc5axMXAY/exec", 
         };
         // =========================================================================
         
@@ -198,11 +200,14 @@
         const outputMessage = document.getElementById('outputMessage');
         let currentGroup = '';
 
+
         const visualItems = [
             { id: 'design_fit', num: '1.', group: 'A. DESAIN & KUALITAS CETAK', name: 'Kesesuaian Desain', criteria: 'Perbandingan langsung sampel fisik terhadap file artwork desain yang disetujui (posisi logo, elemen, tata letak).' },
             { id: 'print_quality', num: '2.', group: 'A. DESAIN & KUALITAS CETAK', name: 'Kualitas Cetak', criteria: 'Ketajaman hasil cetak/objek/teks, tidak ada cacat cetak (smudge, dot gain, miring, bergelombang).' },
+            
             { id: 'text_fit', num: '3.', group: 'B. TEXT (Tulisan)', name: 'Kesesuaian Teks & Angka', criteria: 'Semua tulisan (informasi produk, berat, izin, dll.) dan angka dicetak sesuai draf akhir.' },
             { id: 'readability', num: '4.', group: 'B. TEXT (Tulisan)', name: 'Keterbacaan (Legibility)', criteria: 'Tulisan mudah terbaca, teks dan angka tercetak baik tidak menempel dengan kiri kanannya atau terdistorsi.' },
+            
             { id: 'color_std', num: '5.', group: 'C. TONE WARNA (COLOR MATCHING)', name: 'Tone Warna Standard', criteria: 'Warna standar dibandingkan dengan sampel fisik/standar warna yang disetujui (mid-tone) untuk semua elemen cetak dan dasar karung.' },
             { id: 'color_min', num: '6.', group: 'C. TONE WARNA (COLOR MATCHING)', name: 'Toleransi Tone Minimum', criteria: 'Warna elemen cetak atau dasar harus berada di atas tone warna minimum yang masih dapat diterima (tidak terlalu pudar/terang).' },
             { id: 'color_max', num: '7.', group: 'C. TONE WARNA (COLOR MATCHING)', name: 'Toleransi Tone Maksimum', criteria: 'Warna elemen cetak atau dasar harus berada di bawah tone warna maksimum yang masih dapat diterima (tidak terlalu pekat/gelap).' },
@@ -281,7 +286,7 @@
             document.getElementById('averageScoreDisplay').textContent = averageScore.toFixed(2);
             
             const scoreDisplay = document.getElementById('averageScoreDisplay');
-            scoreDisplay.className = 'text-4xl font-extrabold px-4 py-2 rounded-lg shadow-inner min-w-[120px] text-right bg-white transition-colors duration-300';
+            scoreDisplay.className = 'text-4xl font-extrabold px-4 py-2 rounded-lg shadow-inner min-w-[120px] text-right bg-white';
             if (averageScore >= 4.0) {
                 scoreDisplay.classList.add('text-green-600');
             } else if (averageScore >= 2.5) {
@@ -340,7 +345,7 @@
                     
                     unsubscribe = onAuthStateChanged(auth, (user) => {
                         clearTimeout(timeout);
-                        if (unsubscribe) unsubscribe(); 
+                        unsubscribe(); 
                         
                         if (user) {
                             userId = user.uid;
@@ -351,9 +356,7 @@
                             console.log("Firebase Auth berhasil. User ID:", userId);
                             resolve(); 
                         } else {
-                            // Fallback jika tidak ada user, meskipun signInAnonymously seharusnya memberikan user
                             userId = auth.currentUser?.uid || `anon-${crypto.randomUUID()}`;
-                            console.warn("User tidak ditemukan setelah Auth, menggunakan fallback ID:", userId);
                             resolve(); 
                         }
                     });
@@ -367,75 +370,49 @@
                 submitButton.disabled = true;
             }
         }
+        
+        // FUNGSI 4: Memanggil Web App Google (Sheet & Docs) dengan mode no-cors
+        async function callGoogleWebApp(data) {
+            const webAppUrl = firebaseConfig.googleSheetWebAppUrl;
+            let success = false;
+            let errorMessage = "URL Web App tidak dikonfigurasi.";
 
-        // FUNGSI 4: [BARU] Memanggil Web App Google Sheet
-        async function sendToGoogleSheet(data) {
-            const sheetUrl = firebaseConfig.googleSheetWebAppUrl;
-            if (!sheetUrl || sheetUrl.includes("GANTI_DENGAN_URL")) {
-                 console.warn("URL Google Sheet Web App belum dikonfigurasi. Data tidak dikirim ke Sheet.");
-                 // Mengembalikan status sukses agar tidak dianggap error jika URL tidak ada
-                 return { success: true, message: "Skipped" };
-            }
-            try {
-                console.log('Mengirim data ke Google Sheet via Web App:', sheetUrl);
-                const response = await fetch(sheetUrl, {
-                    method: 'POST',
-                    mode: 'no-cors', // Penting untuk Web Apps Script standar
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data) 
-                });
-                // Dengan 'no-cors', kita tidak bisa membaca response. Anggap sukses jika tidak ada network error.
-                return { success: true };
-            } catch (e) {
-                console.error("Kesalahan saat mengirim data ke Google Sheet:", e);
-                return { success: false, message: `Gagal mengirim ke Sheet: ${e.message}` };
-            }
-        }
+            if (webAppUrl) {
+                try {
+                    console.log('Mengirim data ke Google Web App (mode no-cors):', webAppUrl);
+                    
+                    await fetch(webAppUrl, {
+                        method: 'POST',
+                        mode: 'no-cors', 
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data),
+                    });
 
-        // FUNGSI 5: Memanggil Web App Google Docs (Disesuaikan untuk JSON Response)
-        async function generateGoogleDoc(data) {
-            const docUrl = firebaseConfig.googleDocWebAppUrl;
-            if (!docUrl || docUrl.includes("GANTI_DENGAN_URL")) {
-                console.warn("URL Google Docs Web App belum dikonfigurasi. Dokumen tidak dibuat.");
-                return { docSuccess: true, finalDocLink: null, message: "Skipped" }; // Anggap sukses agar tidak memblokir
-            }
-            try {
-                console.log('Mencoba membuat Google Doc via Web App:', docUrl);
-                
-                const response = await fetch(docUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data) 
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success && result.docUrl) {
-                        return { docSuccess: true, finalDocLink: result.docUrl };
-                    } else {
-                        throw new Error(result.error || "Kegagalan internal pada Apps Script.");
-                    }
-                } else {
-                    throw new Error(`Gagal koneksi HTTP: ${response.status} ${response.statusText}`);
+                    success = true;
+                    errorMessage = null;
+
+                } catch (e) {
+                    console.error("Kesalahan jaringan saat memanggil Web App Google:", e);
+                    errorMessage = e.message;
                 }
-            } catch (e) {
-                console.error("Kesalahan saat mengirim data ke Web App Docs:", e);
-                return { docSuccess: false, message: `Gagal membuat dokumen: ${e.message}` };
             }
+            return { success, finalDocLink: null, errorMessage };
         }
 
-        // FUNGSI 6: Menangani Pengiriman Formulir dan Penyimpanan Data
+
+        // FUNGSI 5: Menangani Pengiriman Formulir dan Penyimpanan Data
         async function handleSubmit(event) {
             event.preventDefault(); 
             
             if (!userId || !db) {
                 console.error("Pengguna belum diautentikasi atau DB belum siap.");
                 outputMessage.textContent = "Gagal mengirim: Harap tunggu sebentar sampai sistem siap atau muat ulang.";
-                outputMessage.className = 'block mt-8 p-4 rounded-xl font-semibold border shadow-inner bg-red-100 text-red-700 border-red-300';
+                outputMessage.classList.remove('hidden');
                 return;
             }
 
-            // Atur tombol menjadi loading state
             submitButton.disabled = true;
             submitButton.textContent = "Memproses...";
             outputMessage.classList.add('hidden');
@@ -444,88 +421,83 @@
             const formData = new FormData(reviewForm);
             
             const reviewData = {
-                productName: formData.get('product_name'),
-                supplierName: formData.get('supplier_name'),
-                sampleDate: formData.get('sample_date'),
-                reviewerName: formData.get('reviewer_name'),
+                product_name: formData.get('product_name'),
+                supplier_name: formData.get('supplier_name'),
+                sample_date: formData.get('sample_date'),
+                reviewer_name: formData.get('reviewer_name'),
                 timestamp: new Date().toISOString(), 
                 reviewerId: userId,
-                averageScore: finalAverageScore,
-                visualReview: JSON.stringify(visualItems.map(item => ({ // Stringify untuk Google Sheet
+                average_score: finalAverageScore,
+                recommendation: formData.get('recommendation'),
+                recommendation_notes: formData.get('recommendation_notes'),
+                doc_coa_status: formData.get('doc_coa_status'),
+                doc_coa_notes: formData.get('doc_coa_notes'),
+                visualReview: visualItems.map(item => ({
+                    num: item.num,
+                    group: item.group,
                     item: item.name,
+                    criteria: item.criteria,
                     rating: parseInt(formData.get(`${item.id}_rating`)),
                     status: formData.get(`${item.id}_status`),
                     notes: formData.get(`${item.id}_notes`)
-                }))),
-                docCoaStatus: formData.get('doc_coa_status'),
-                docCoaNotes: formData.get('doc_coa_notes'),
-                recommendation: formData.get('recommendation'),
-                recommendationNotes: formData.get('recommendation_notes')
+                }))
             };
             
-            const reviewDataForFirestore = { ...reviewData, visualReview: JSON.parse(reviewData.visualReview) };
+            visualItems.forEach(item => {
+                reviewData[`rating_${item.id}`] = formData.get(`${item.id}_rating`);
+                reviewData[`status_${item.id}`] = formData.get(`${item.id}_status`);
+                reviewData[`notes_${item.id}`] = formData.get(`${item.id}_notes`);
+            });
 
-            // --- Mulai Proses Simpan Tiga Arah ---
-            let firestoreResult, docResult, sheetResult;
+            let firestoreSuccess = false;
+            let firestoreError = null;
 
-            // 1. Simpan ke Firestore
             try {
-                const collectionPath = `artifacts/${appId}/private/sack_reviews`; // Path yang lebih umum
-                await addDoc(collection(db, collectionPath), reviewDataForFirestore);
-                firestoreResult = { success: true };
+                // ===== PERBAIKAN DI SINI =====
+                // Jalur yang benar harus memiliki 5 segmen (ganjil)
+                const collectionPath = `artifacts/${appId}/users/${userId}/sack_reviews`;
+                await addDoc(collection(db, collectionPath), reviewData);
+                firestoreSuccess = true;
                 console.log('Data berhasil disimpan ke Firestore.');
             } catch (e) {
-                firestoreResult = { success: false, message: `Firebase GAGAL: ${e.message}` };
                 console.error("Kesalahan saat menyimpan data ke Firestore: ", e);
+                firestoreError = e.message;
             }
 
-            // 2 & 3. Kirim ke Google Services (Sheet dan Doc) secara paralel
-            if (firestoreResult.success) {
-                 [sheetResult, docResult] = await Promise.all([
-                    sendToGoogleSheet(reviewData),
-                    generateGoogleDoc(reviewDataForFirestore) // Kirim data yang tidak di-stringify
-                ]);
-            }
-
-            // --- Tampilkan Pesan Akhir ---
-            let finalMessage = "";
-            let colorClass = "";
-
-            if (firestoreResult.success && docResult.docSuccess && sheetResult.success) {
-                finalMessage = `✅ SUKSES! Data disimpan ke Firebase, Google Sheet, dan laporan dibuat.`;
-                if(docResult.finalDocLink) {
-                    finalMessage += ` <a href="${docResult.finalDocLink}" target="_blank" class="text-blue-700 underline font-bold hover:text-blue-900">Lihat Google Doc</a>`;
-                }
-                colorClass = 'bg-green-100 text-green-700 border-green-300';
-            } else {
-                let errorMessages = [];
-                if (!firestoreResult.success) errorMessages.push(firestoreResult.message);
-                if (!sheetResult?.success) errorMessages.push(sheetResult.message);
-                if (!docResult?.docSuccess) errorMessages.push(docResult.message);
-                
-                finalMessage = `⚠️ SEBAGIAN GAGAL: Data berhasil disimpan ke Firebase, tetapi terjadi masalah lain. Detail: ${errorMessages.join(', ')}`;
-                colorClass = 'bg-yellow-100 text-yellow-700 border-yellow-300';
-
-                if (!firestoreResult.success) {
-                     finalMessage = `❌ SEMUA GAGAL! Tidak dapat menyimpan data ke Firebase. Error: ${firestoreResult.message}`;
-                     colorClass = 'bg-red-100 text-red-700 border-red-300';
-                }
+            let googleResult = { success: false, finalDocLink: null, errorMessage: "Penyimpanan Firebase gagal, proses Google dilewati." };
+            if (firestoreSuccess) {
+                googleResult = await callGoogleWebApp(reviewData);
             }
             
-            outputMessage.innerHTML = finalMessage;
+            let message = "";
+            let colorClass = "";
+
+            if (firestoreSuccess && googleResult.success) {
+                message = `✅ SEMUA PROSES BERHASIL! Data telah dikirim ke Google Sheet & untuk pembuatan laporan. Silakan periksa folder Google Drive Anda.`;
+                colorClass = 'bg-green-100 text-green-700 border-green-300';
+            } else if (firestoreSuccess && !googleResult.success) {
+                message = `⚠️ SEBAGIAN GAGAL: Data berhasil disimpan ke Firebase, tetapi GAGAL mengirim ke Google. Detail: ${googleResult.errorMessage}`;
+                colorClass = 'bg-yellow-100 text-yellow-700 border-yellow-300';
+            } else {
+                message = `❌ SEMUA GAGAL! Penyimpanan ke Firebase gagal. Detail: ${firestoreError}.`;
+                colorClass = 'bg-red-100 text-red-700 border-red-300';
+            }
+            
+            outputMessage.innerHTML = message;
             reviewForm.reset(); 
             updateAverageScore(); 
             
-            outputMessage.className = `block mt-8 p-4 rounded-xl font-semibold border shadow-inner ${colorClass}`;
+            outputMessage.className = `mt-8 p-4 rounded-xl font-semibold border shadow-inner ${colorClass}`;
             outputMessage.scrollIntoView({ behavior: 'smooth' });
 
             submitButton.textContent = "KIRIMKAN REVIEW & SIMPAN DATA";
             submitButton.disabled = false;
         }
 
-        // Jalankan inisialisasi saat halaman dimuat
         initializeFirebaseAndAuth();
 
     </script>
 </body>
 </html>
+
+
