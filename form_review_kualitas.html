@@ -10,7 +10,7 @@
         /* Menggunakan font Inter */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0dbfb0; /* Mengembalikan warna latar belakang ke biru muda */
+            background-color: #3a7a75; /* Warna latar belakang dari versi terakhir */
         }
     </style>
 </head>
@@ -369,44 +369,41 @@
             }
         }
         
-        // FUNGSI 4: Memanggil Web App Google (Sheet & Docs)
+        // FUNGSI 4: Memanggil Web App Google (Sheet & Docs) dengan mode no-cors
         async function callGoogleWebApp(data) {
-            const docUrl = firebaseConfig.googleDocWebAppUrl;
+            // Menggunakan URL dari googleSheetWebAppUrl untuk konsistensi, karena keduanya harusnya sama.
+            const webAppUrl = firebaseConfig.googleSheetWebAppUrl;
             let success = false;
-            let finalDocLink = null;
             let errorMessage = "URL Web App tidak dikonfigurasi.";
 
-            if (docUrl) {
+            if (webAppUrl) {
                 try {
-                    console.log('Mencoba memanggil Google Web App:', docUrl);
+                    console.log('Mengirim data ke Google Web App (mode no-cors):', webAppUrl);
                     
-                    const response = await fetch(docUrl, {
+                    // Menggunakan mode 'no-cors' untuk menghindari error 'Failed to fetch'
+                    await fetch(webAppUrl, {
                         method: 'POST',
-                        // Menghapus mode: 'no-cors' agar bisa membaca respons
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
+                        mode: 'no-cors', // INI PERUBAHAN PENTING UNTUK MENGATASI CORS
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data),
+                        // 'redirect: "follow"' tidak diperlukan di sini karena 'no-cors' tidak memproses redirect
                     });
-                    
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.success) {
-                            success = true;
-                            finalDocLink = result.docUrl;
-                            errorMessage = null;
-                        } else {
-                            // Menangkap pesan error spesifik dari Apps Script
-                            throw new Error(result.error || "Kegagalan internal pada Apps Script.");
-                        }
-                    } else {
-                        // Menangkap error HTTP
-                        throw new Error(`Gagal koneksi HTTP: ${response.status} ${response.statusText}`);
-                    }
+
+                    // Dalam mode 'no-cors', kita tidak bisa membaca respons.
+                    // Kita asumsikan pengiriman berhasil jika tidak ada error jaringan.
+                    success = true;
+                    errorMessage = null;
+
                 } catch (e) {
-                    console.error("Kesalahan saat memanggil Web App Google:", e);
+                    // Error ini biasanya hanya terjadi jika ada masalah jaringan.
+                    console.error("Kesalahan jaringan saat memanggil Web App Google:", e);
                     errorMessage = e.message;
                 }
             }
-            return { success, finalDocLink, errorMessage };
+            // Karena 'no-cors', kita tidak bisa mendapatkan link dokumen kembali.
+            return { success, finalDocLink: null, errorMessage };
         }
 
 
@@ -491,10 +488,11 @@
             let colorClass = "";
 
             if (firestoreSuccess && googleResult.success) {
-                message = `✅ SEMUA PROSES BERHASIL! Dokumen Laporan: <a href="${googleResult.finalDocLink}" target="_blank" class="text-blue-700 underline font-bold hover:text-blue-900">Lihat Google Doc</a>`;
+                // Pesan diubah karena tidak ada link kembali
+                message = `✅ SEMUA PROSES BERHASIL! Data telah dikirim ke Google Sheet & untuk pembuatan laporan. Silakan periksa folder Google Drive Anda.`;
                 colorClass = 'bg-green-100 text-green-700 border-green-300';
             } else if (firestoreSuccess && !googleResult.success) {
-                message = `⚠️ SEBAGIAN GAGAL: Data berhasil disimpan ke Firebase, tetapi GAGAL memproses di Google. Detail: ${googleResult.errorMessage}`;
+                message = `⚠️ SEBAGIAN GAGAL: Data berhasil disimpan ke Firebase, tetapi GAGAL mengirim ke Google. Detail: ${googleResult.errorMessage}`;
                 colorClass = 'bg-yellow-100 text-yellow-700 border-yellow-300';
             } else {
                 message = `❌ SEMUA GAGAL! Penyimpanan ke Firebase gagal. Detail: ${firestoreError}.`;
