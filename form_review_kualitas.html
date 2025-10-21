@@ -13,7 +13,7 @@
         /* Menggunakan font Inter */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #99bf0d; /* Light blue background */
+            background-color: #07f2a0; /* Light blue background */
         }
     </style>
 </head>
@@ -178,10 +178,10 @@
             appId: "1:817094832497:web:24f99fb36b3e1883f9c6d0",
             
             // URL WEB APP GOOGLE SHEET (PASTIKAN SUDAH BERAKHIR /exec)
-            googleSheetWebAppUrl: "https://script.google.com/macros/s/AKfycbyvH6ihucsb78Uveat7Uzd2ITd-FX0AobcP84S6XSx_9CD7fBJcMJglKa52-bTy8KUa/exec", 
+            googleSheetWebAppUrl: "https://script.google.com/macros/s/AKfycbwKpsgmibj52obEBjsAwLwiC5KiDt9-DNzopsEIpsZD4-7_Fo80G_5MPo0ptPLqzm6uiw/exec", 
 
             // URL WEB APP GOOGLE DOCS (PASTIKAN SUDAH BERAKHIR /exec)
-            googleDocWebAppUrl: "https://script.google.com/macros/s/AKfycbzEgybvBK2h0KutOUf2iWgHD92AQsndCvge6VqP_O9uXKBl7TAkFQkCbDLbc5axMXAY/exec", 
+            googleDocWebAppUrl: "https://script.google.com/macros/s/AKfycbwKpsgmibj52obEBjsAwLwiC5KiDt9-DNzopsEIpsZD4-7_Fo80G_5MPo0ptPLqzm6uiw/exec", 
         };
         // =========================================================================
         
@@ -402,24 +402,22 @@
             try {
                 console.log('Mencoba membuat Google Doc via Web App:', docUrl);
                 
+                // MENGGUNAKAN 'no-cors' UNTUK MENGHINDARI ERROR FETCH KARENA MASALAH CORS
+                // Konsekuensinya: kita tidak bisa membaca respons (termasuk link dokumen) dari skrip.
                 const response = await fetch(docUrl, {
                     method: 'POST',
+                    mode: 'no-cors', // PERUBAHAN UTAMA
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data) 
                 });
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success && result.docUrl) {
-                        return { docSuccess: true, finalDocLink: result.docUrl };
-                    } else {
-                        throw new Error(result.error || "Kegagalan internal pada Apps Script.");
-                    }
-                } else {
-                    throw new Error(`Gagal koneksi HTTP: ${response.status} ${response.statusText}`);
-                }
+                // Karena 'no-cors', kita tidak bisa memeriksa response.ok atau membaca body.
+                // Kita anggap berhasil jika tidak ada error jaringan yang dilempar oleh fetch.
+                return { docSuccess: true, finalDocLink: null }; // Link tidak bisa didapatkan lagi
+
             } catch (e) {
                 console.error("Kesalahan saat mengirim data ke Web App Docs:", e);
+                // Error yang ditangkap di sini biasanya adalah error jaringan fundamental, bukan HTTP status.
                 return { docSuccess: false, message: `Gagal membuat dokumen: ${e.message}` };
             }
         }
@@ -497,10 +495,8 @@
             const isSheetSuccess = sheetResult?.success ?? false;
 
             if (isFirestoreSuccess && isDocSuccess && isSheetSuccess) {
-                finalMessage = `✅ SUKSES! Data disimpan ke Firebase, Google Sheet, dan laporan dibuat.`;
-                if(docResult.finalDocLink) {
-                    finalMessage += ` <a href="${docResult.finalDocLink}" target="_blank" class="text-blue-700 underline font-bold hover:text-blue-900">Lihat Google Doc</a>`;
-                }
+                // PERUBAHAN: Pesan sukses disesuaikan karena link Doc tidak lagi tersedia
+                finalMessage = `✅ SUKSES! Data disimpan ke Firebase, Google Sheet, dan permintaan pembuatan laporan telah dikirim.`;
                 colorClass = 'bg-green-100 text-green-700 border-green-300';
             } else if (isFirestoreSuccess) {
                 let errorMessages = [];
