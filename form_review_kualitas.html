@@ -34,7 +34,7 @@
         <form id="reviewForm" class="space-y-12">
 
             <!-- BAGIAN HEADER/METADATA BARU -->
-            <section id="metadataInputs" class="space-y-4 p-6 border border-gray-200 rounded-xl bg-gray-50 shadow-inner">
+            <section id="metadataInputs" class="space-y-4 p-6 border border-gray-200 rounded-xl bg-gray-100 shadow-inner">
                 <h2 class="text-xl font-extrabold text-gray-700">Detail Sampel</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
@@ -179,10 +179,10 @@
             messagingSenderId: "817094832497",
             appId: "1:817094832497:web:24f99fb36b3e1883f9c6d0",
             
-            // URL WEB APP GAS GOOGLE SHEET (MASIH BERMASALAH, JANGAN DIUBAH DULU)
+            // URL WEB APP GAS GOOGLE SHEET (DIBATALKAN)
             googleSheetWebAppUrl: "https://script.google.com/macros/s/AKfycbyvH6ihucsb78Uveat7Uzd2ITd-FX0AobcP84S6XSx_9CD7fBJcMJglKa52-bTy8KUa/exec", 
 
-            // URL WEB APP GAS BARU UNTUK GOOGLE DOCS (DIPEROLEH DARI LANGKAH 1)
+            // URL WEB APP GAS BARU UNTUK GOOGLE DOCS (PASTIKAN SUDAH BERAKHIR /exec)
             googleDocWebAppUrl: "https://script.google.com/macros/s/AKfycbzEgybvBK2h0KutOUf2iWgHD92AQsndCvge6VqP_O9uXKBl7TAkFQkCbDLbc5axMXAY/exec", 
         };
         // =========================================================================
@@ -193,12 +193,14 @@
 
         let db, auth, userId = null;
 
-        // Mendapatkan referensi ke elemen baru
         const submitButton = document.getElementById('submitButton');
         const systemStatus = document.getElementById('systemStatus');
+        const visualReviewContainer = document.getElementById('visualReviewItems');
+        const reviewForm = document.getElementById('reviewForm');
+        const outputMessage = document.getElementById('outputMessage');
+        let currentGroup = '';
 
 
-        // Array yang berisi semua item review visual
         const visualItems = [
             { id: 'design_fit', num: '1.', group: 'A. DESAIN & KUALITAS CETAK', name: 'Kesesuaian Desain', criteria: 'Perbandingan langsung sampel fisik terhadap file artwork desain yang disetujui (posisi logo, elemen, tata letak).' },
             { id: 'print_quality', num: '2.', group: 'A. DESAIN & KUALITAS CETAK', name: 'Kualitas Cetak', criteria: 'Ketajaman hasil cetak/objek/teks, tidak ada cacat cetak (smudge, dot gain, miring, bergelombang).' },
@@ -210,11 +212,6 @@
             { id: 'color_min', num: '6.', group: 'C. TONE WARNA (COLOR MATCHING)', name: 'Toleransi Tone Minimum', criteria: 'Warna elemen cetak atau dasar harus berada di atas tone warna minimum yang masih dapat diterima (tidak terlalu pudar/terang).' },
             { id: 'color_max', num: '7.', group: 'C. TONE WARNA (COLOR MATCHING)', name: 'Toleransi Tone Maksimum', criteria: 'Warna elemen cetak atau dasar harus berada di bawah tone warna maksimum yang masih dapat diterima (tidak terlalu pekat/gelap).' },
         ];
-
-        const visualReviewContainer = document.getElementById('visualReviewItems');
-        const reviewForm = document.getElementById('reviewForm');
-        const outputMessage = document.getElementById('outputMessage');
-        let currentGroup = '';
 
         // FUNGSI 1: Membuat elemen HTML untuk setiap item review
         function generateReviewItem(item) {
@@ -283,14 +280,11 @@
                 }
             });
 
-            // Total divisor adalah 7 karena ada 7 item visual
             const divisor = visualItems.length; 
             const averageScore = divisor > 0 ? (totalScore / divisor) : 0;
             
-            // Perbarui tampilan UI
             document.getElementById('averageScoreDisplay').textContent = averageScore.toFixed(2);
             
-            // Mengubah warna skor berdasarkan nilainya
             const scoreDisplay = document.getElementById('averageScoreDisplay');
             scoreDisplay.className = 'text-4xl font-extrabold px-4 py-2 rounded-lg shadow-inner min-w-[120px] text-right bg-white';
             if (averageScore >= 4.0) {
@@ -301,27 +295,21 @@
                 scoreDisplay.classList.add('text-red-600');
             }
             
-            return averageScore; // Kembalikan nilai rata-rata
+            return averageScore;
         }
 
         // FUNGSI 3: Inisialisasi Firebase dan Otentikasi
         async function initializeFirebaseAndAuth() {
             
-            // 1. Memuat semua item review visual
             visualReviewContainer.innerHTML = visualItems.map(generateReviewItem).join('');
             
-            // 2. Pasang listener untuk pembaruan skor real-time
             document.querySelectorAll('.rating-select').forEach(select => {
                 select.addEventListener('change', updateAverageScore);
             });
             
-            // Panggil sekali untuk memastikan tampilan skor awal
             updateAverageScore();
-            
-            // 3. Pasang listener untuk pengiriman formulir
             reviewForm.addEventListener('submit', handleSubmit);
             
-            // Tampilkan status loading awal dan nonaktifkan tombol
             systemStatus.classList.remove('hidden');
             submitButton.disabled = true;
             submitButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
@@ -329,24 +317,18 @@
 
             if (!firebaseConfig || !firebaseConfig.projectId) {
                 console.error("Kesalahan: Konfigurasi Firebase tidak ada.");
-                outputMessage.textContent = "Peringatan: Konfigurasi Firebase TIDAK LENGKAP.";
-                outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300');
-                outputMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
-                
                 systemStatus.textContent = "Koneksi Firebase GAGAL: Konfigurasi tidak lengkap.";
                 systemStatus.classList.remove('bg-yellow-100', 'text-yellow-800');
                 systemStatus.classList.add('bg-red-100', 'text-red-800');
-                
                 return;
             }
 
             try {
-                setLogLevel('debug'); // DI AKTIFKAN UNTUK MENDAPATKAN DETAIL ERROR!
+                setLogLevel('debug');
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // Otentikasi
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
@@ -389,7 +371,7 @@
             }
         }
 
-        // FUNGSI 4: Memanggil Web App Google Docs
+        // FUNGSI 4: Memanggil Web App Google Docs (Disesuaikan untuk JSON Response)
         async function generateGoogleDoc(data) {
             const docUrl = firebaseConfig.googleDocWebAppUrl;
             let docSuccess = false;
@@ -399,10 +381,9 @@
                 try {
                     console.log('Mencoba membuat Google Doc via Web App:', docUrl);
                     
-                    // Mode no-cors tidak diperlukan karena GAS Web App merespons dengan JSON (ContentService)
                     const response = await fetch(docUrl, {
                         method: 'POST',
-                        // TIDAK menggunakan mode: 'no-cors' agar dapat membaca respon status dan JSON
+                        // TIDAK menggunakan mode: 'no-cors' agar dapat membaca respon status dan JSON dari GAS
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data) 
                     });
@@ -412,15 +393,19 @@
                         if (result.success && result.docUrl) {
                             docSuccess = true;
                             finalDocLink = result.docUrl;
-                            console.log("Google Doc berhasil dibuat! URL:", finalDocLink);
                         } else {
                             console.error("GAS Docs merespons sukses HTTP tetapi gagal di sisi server. Error GAS:", result.error);
+                            // Log error spesifik dari GAS untuk ditampilkan ke pengguna
+                            throw new Error(result.error || "Kegagalan internal GAS.");
                         }
                     } else {
                         console.error("Gagal koneksi ke Web App Docs. Status HTTP:", response.status);
+                        throw new Error(`Gagal koneksi HTTP: ${response.status} ${response.statusText}`);
                     }
                 } catch (e) {
-                    console.error("Kesalahan Jaringan saat mengirim data ke Web App Docs:", e);
+                    console.error("Kesalahan saat mengirim data ke Web App Docs:", e);
+                    // Melemparkan kembali error untuk ditangani oleh catch utama
+                    throw new Error(`Gagal membuat dokumen: ${e.message}`); 
                 }
             } else {
                 console.warn("Peringatan: URL Web App Google Docs belum dikonfigurasi. Dokumen tidak dibuat.");
@@ -429,7 +414,7 @@
         }
 
 
-        // FUNGSI 5: Menangani Pengiriman Formulir dan Penyimpanan Data ke Firestore DAN Google Sheet
+        // FUNGSI 5: Menangani Pengiriman Formulir dan Penyimpanan Data
         async function handleSubmit(event) {
             event.preventDefault(); 
             
@@ -443,51 +428,39 @@
             // Atur tombol menjadi loading state
             submitButton.disabled = true;
             submitButton.textContent = "Memproses...";
-            
             outputMessage.classList.add('hidden');
 
-            const finalAverageScore = updateAverageScore(); // Hitung skor akhir sebelum pengiriman
-            
+            const finalAverageScore = updateAverageScore(); 
             const formData = new FormData(reviewForm);
             
-            // Kumpulkan data ke dalam objek yang akan dikirim ke Firebase dan GAS
             const reviewData = {
                 productName: formData.get('product_name'),
                 supplierName: formData.get('supplier_name'),
                 sampleDate: formData.get('sample_date'),
                 reviewerName: formData.get('reviewer_name'),
-                
                 timestamp: new Date().toISOString(), 
                 reviewerId: userId,
-                averageScore: finalAverageScore, // Sudah berupa float
-                
-                visualReview: [],
-                
+                averageScore: finalAverageScore,
+                visualReview: visualItems.map(item => ({
+                    item: item.name,
+                    rating: parseInt(formData.get(`${item.id}_rating`)),
+                    status: formData.get(`${item.id}_status`),
+                    notes: formData.get(`${item.id}_notes`)
+                })),
                 documentReview: {
                     item: 'Kelengkapan Dokumen COA',
                     status: formData.get('doc_coa_status'),
                     notes: formData.get('doc_coa_notes')
                 },
-
                 recommendation: formData.get('recommendation'),
                 recommendationNotes: formData.get('recommendation_notes')
             };
-
-            visualItems.forEach(item => {
-                const id = item.id;
-                reviewData.visualReview.push({
-                    item: item.name,
-                    rating: parseInt(formData.get(`${id}_rating`)),
-                    status: formData.get(`${id}_status`),
-                    notes: formData.get(`${id}_notes`)
-                });
-            });
 
             // --- Mulai Proses Dual Save ---
             let firestoreSuccess = false;
             let docSuccess = false;
             let finalDocLink = null;
-            let sheetSuccess = false;
+            let docErrorMessage = null; 
 
             // 1. SIMPAN KE FIRESTORE (Sudah Berhasil)
             try {
@@ -497,32 +470,21 @@
                 console.log('Data berhasil disimpan ke Firestore.');
             } catch (e) {
                 console.error("Kesalahan saat menyimpan data ke Firestore: ", e);
+                docErrorMessage = `Firebase GAGAL: ${e.message}`;
             }
 
-            // 2. BUAT GOOGLE DOC VIA WEB APP (Baru)
+            // 2. BUAT GOOGLE DOC VIA WEB APP
             if (firestoreSuccess) {
-                const docResult = await generateGoogleDoc(reviewData);
-                docSuccess = docResult.docSuccess;
-                finalDocLink = docResult.finalDocLink;
-            }
-            
-            // 3. SIMPAN KE GOOGLE SHEET VIA WEB APP (Dibiarkan tetap ada, mungkin akan berhasil)
-            const gasSheetUrl = firebaseConfig.googleSheetWebAppUrl;
-            if (gasSheetUrl && gasSheetUrl !== "GANTI_DENGAN_URL_WEB_APP_ANDA") {
                 try {
-                    // Masih menggunakan mode 'no-cors' untuk kompatibilitas yang lebih luas.
-                    await fetch(gasSheetUrl, {
-                        method: 'POST',
-                        mode: 'no-cors', 
-                        body: JSON.stringify(reviewData)
-                    });
-                    sheetSuccess = true; 
+                    const docResult = await generateGoogleDoc(reviewData);
+                    docSuccess = docResult.docSuccess;
+                    finalDocLink = docResult.finalDocLink;
                 } catch (e) {
-                    console.error("Kesalahan Jaringan saat mengirim data ke Google Sheet:", e);
+                    docErrorMessage = e.message;
+                    console.error("Gagal membuat Google Doc: ", e);
                 }
             }
-
-
+            
             // --- Tampilkan Pesan Akhir ---
             let message = "";
             let colorClass = "";
@@ -531,17 +493,13 @@
                 message = `✅ REVIEW BERHASIL DISIMPAN! Dokumen Laporan: <a href="${finalDocLink}" target="_blank" class="text-blue-700 underline font-bold hover:text-blue-900">Lihat Google Doc</a>`;
                 colorClass = 'bg-green-100 text-green-700 border-green-300';
             } else if (firestoreSuccess && !docSuccess) {
-                message = `⚠️ REVIEW BERHASIL DISIMPAN ke Firebase, tetapi GAGAL membuat Google Doc. (Skor: ${finalAverageScore.toFixed(2)}). Cek log Apps Script Anda.`;
+                message = `⚠️ REVIEW BERHASIL DISIMPAN ke Firebase, tetapi GAGAL membuat Google Doc! (${docErrorMessage}). Cek log Apps Script Anda.`;
                 colorClass = 'bg-yellow-100 text-yellow-700 border-yellow-300';
             } else {
-                message = `❌ Gagal menyimpan data (Firebase dan Google Doc). Harap periksa koneksi atau konfigurasi Firebase.`;
+                message = `❌ Gagal menyimpan data! (${docErrorMessage || 'Koneksi Firebase gagal.'}). Harap periksa konfigurasi.`;
                 colorClass = 'bg-red-100 text-red-700 border-red-300';
             }
             
-            if (sheetSuccess) {
-                message += " (Pengiriman Google Sheet juga terdeteksi berhasil (via no-cors).)";
-            }
-
             outputMessage.innerHTML = message;
             reviewForm.reset(); 
             updateAverageScore(); 
@@ -550,7 +508,6 @@
             outputMessage.classList.add(...colorClass.split(' ')); 
             outputMessage.scrollIntoView({ behavior: 'smooth' });
 
-            // Kembalikan tombol ke keadaan semula
             submitButton.textContent = "KIRIMKAN REVIEW & SIMPAN DATA";
             submitButton.disabled = false;
         }
