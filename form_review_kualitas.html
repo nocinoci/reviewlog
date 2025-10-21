@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Review Kualitas Hasil Sampel Karung</title>
+    <!-- Memuat Tailwind CSS untuk styling modern dan responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Menggunakan font Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue background */
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-3xl">
+        <header class="mb-8 border-b-4 border-blue-600 pb-4">
+            <h1 class="text-4xl font-black text-gray-800">
+                Formulir Review Kualitas Sampel Karung 
+            </h1>
+            <p class="text-gray-600 mt-2">
+                Lengkapi ulasan dengan skor dan rekomendasi untuk sampel yang diperiksa.
+            </p>
+        </header>
+
+        <!-- Form Utama -->
+        <form id="reviewForm" class="space-y-12">
+
+            <!-- KATEGORI I: REVIEW VISUAL -->
+            <section class="space-y-6 p-6 border border-gray-200 rounded-xl shadow-lg bg-white">
+                <h2 class="text-2xl font-extrabold text-blue-700 border-b pb-2">
+                    I. Review Visual (Nilai 1-5)
+                </h2>
+
+                <!-- Bagian A, B, C akan menggunakan fungsi generateReviewItem -->
+                <div id="visualReviewItems" class="space-y-6">
+                    <!-- Item Review akan dimasukkan di sini oleh JS -->
+                </div>
+
+            </section>
+            
+            <!-- KATEGORI II: KELENGKAPAN DOKUMEN -->
+            <section class="space-y-4 pt-6 border-t border-gray-300">
+                <h2 class="text-2xl font-extrabold text-green-700 border-b pb-2">
+                    II. Kelengkapan Dokumen
+                </h2>
+                
+                <div class="p-6 bg-green-50 rounded-xl shadow-md border-2 border-green-200">
+                    <h3 class="font-bold text-lg text-green-800 mb-3">8. Kelengkapan Dokumen COA</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Status Kelengkapan -->
+                        <div>
+                            <label for="doc_coa_status" class="block text-sm font-medium text-gray-700 mb-1">Status Dokumen</label>
+                            <select id="doc_coa_status" name="doc_coa_status" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 bg-white">
+                                <option value="Ada">Ada</option>
+                                <option value="Tidak Ada">Tidak Ada</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Catatan -->
+                        <div class="md:col-span-2">
+                            <label for="doc_coa_notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+                            <textarea id="doc_coa_notes" name="doc_coa_notes" rows="2" placeholder="Catatan terkait COA (Opsional)" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- CARD SKOR RATA-RATA -->
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-lg shadow-xl flex justify-between items-center transition duration-300 hover:bg-blue-100 mx-auto max-w-full">
+                <p class="text-lg font-bold text-blue-800">SKOR RATA-RATA VISUAL AKHIR (I. Review Visual):</p>
+                <span id="averageScoreDisplay" class="text-4xl font-extrabold text-blue-900 bg-white px-4 py-2 rounded-lg shadow-inner min-w-[120px] text-right">0.00</span>
+            </div>
+
+
+            <!-- KATEGORI III: REKOMENDASI DAN TINDAK LANJUT -->
+            <section class="space-y-4 pt-6 border-t border-gray-300">
+                <h2 class="text-2xl font-extrabold text-orange-700 border-b pb-2">
+                    III. Rekomendasi dan Tindak Lanjut
+                </h2>
+
+                <div class="p-6 bg-orange-50 rounded-xl shadow-md border-2 border-orange-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        
+                        <!-- Rekomendasi (Dropdown) -->
+                        <div>
+                            <label for="recommendation_status" class="block text-sm font-medium text-gray-700 mb-1">Pilih Rekomendasi</label>
+                            <select id="recommendation_status" name="recommendation" required
+                                    class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 bg-white">
+                                <option value="" disabled selected>-- Pilih Tindak Lanjut --</option>
+                                <option value="Diterima">Diterima</option>
+                                <option value="Diterima dengan catatan">Diterima dengan catatan</option>
+                                <option value="Revisi">Revisi</option>
+                                <option value="Ditolak">Ditolak</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Catatan -->
+                        <div class="md:col-span-2">
+                            <label for="recommendation_notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan Rekomendasi</label>
+                            <textarea id="recommendation_notes" name="recommendation_notes" rows="2" placeholder="Catatan spesifik untuk rekomendasi ini (Wajib diisi jika Revisi/Ditolak)" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Tombol Kirim -->
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition duration-300 shadow-xl mt-8">
+                KIRIMKAN REVIEW & SIMPAN DATA
+            </button>
+        </form>
+
+        <!-- Area Pesan/Output -->
+        <div id="outputMessage" class="hidden mt-8 p-4 bg-green-100 text-green-700 rounded-xl font-semibold border border-green-300 shadow-inner">
+            <!-- Pesan sukses atau error akan ditampilkan di sini -->
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // PENTING: GANTI NILAI DI BAWAH INI DENGAN KONFIGURASI FIREBASE ASLI ANDA
+        // Ini diperlukan karena variabel Canvas (__firebase_config) tidak tersedia di GitHub Pages.
+        // Anda harus mendaftar aplikasi Web di Konsol Firebase Anda untuk mendapatkan data ini.
+        const MY_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCs585ga4gFHMMqP-QUFvnWi-SleW3L1sg",
+            authDomain: "reviewlog-90ece.firebaseapp.com",
+            projectId: "reviewlog-90ece",
+            storageBucket: "reviewlog-90ece.firebasestorage.app",
+            messagingSenderId: "817094832497",
+            appId: "1:817094832497:web:24f99fb36b3e1883f9c6d0"
+        };
+        // =========================================================================
+        
+        // Fallback: Gunakan konfigurasi Canvas jika ada, jika tidak gunakan konfigurasi manual
+        // Catatan: Karena kita menggunakan signInAnonymously sebagai default, kita akan menggunakan projectId sebagai 'appId' fallback.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : MY_FIREBASE_CONFIG.projectId;
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : MY_FIREBASE_CONFIG;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
+
+        let db, auth, userId = null;
+
+        // Array yang berisi semua item review visual
+        const visualItems = [
+            { id: 'design_fit', num: '1.', group: 'A. Desain dan Kualitas Cetak', name: 'Kesesuaian Desain', criteria: 'Perbandingan sampel fisik terhadap artwork desain yang disetujui (ukuran, elemen, layout)' },
+            { id: 'print_quality', num: '2.', group: 'A. Desain dan Kualitas Cetak', name: 'Kualitas Cetak', criteria: 'Ketajaman hasil cetak/objek/teks, ada tidaknya cacat cetak (noda, luntur, dotgain, mirik, begelombang)' },
+            
+            { id: 'text_fit', num: '3.', group: 'B. Teks dan Tulisan', name: 'Keseuaian Teks dan Angka', criteria: 'Kesesuaian teks dan angka pada sampel dengan spesifikasi.' },
+            { id: 'readability', num: '4.', group: 'B. Teks dan Tulisan', name: 'Keterbacaan', criteria: 'Keterbacaan huruf dan angka, terutama pada teks kecil.' },
+            
+            { id: 'color_std', num: '5.', group: 'C. TONE WARNA', name: 'Tone Warna Standard', criteria: 'Kesesuaian tone warna sampel dengan warna standard yang disetujui.' },
+            { id: 'color_min', num: '6.', group: 'C. TONE WARNA', name: 'Toleransi Tone Minimum', criteria: 'Hasil cetak tidak lebih muda/tipis dari batas toleransi minimum.' },
+            { id: 'color_max', num: '7.', group: 'C. TONE WARNA', name: 'Toleransi Tone Maksimum', criteria: 'Hasil cetak tidak lebih tua/pekat dari batas toleransi maksimum.' },
+        ];
+
+        const visualReviewContainer = document.getElementById('visualReviewItems');
+        const reviewForm = document.getElementById('reviewForm');
+        const outputMessage = document.getElementById('outputMessage');
+        let currentGroup = '';
+
+        // FUNGSI 1: Membuat elemen HTML untuk setiap item review
+        function generateReviewItem(item) {
+            let html = '';
+            
+            if (item.group !== currentGroup) {
+                if (currentGroup !== '') {
+                    html += '<div class="mt-6 border-t-2 border-dashed border-blue-200 pt-4"></div>';
+                }
+                html += `<h3 class="text-xl font-bold text-gray-700 mb-3">${item.group}</h3>`;
+                currentGroup = item.group;
+            }
+
+            html += `
+                <div class="p-4 bg-white rounded-xl shadow-md border border-gray-100 transition duration-150 hover:shadow-lg">
+                    <h4 class="font-bold text-base text-gray-800 mb-1">${item.num} ${item.name}</h4>
+                    <p class="text-xs text-gray-500 mb-4 italic">Kriteria: ${item.criteria}</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        
+                        <!-- Kolom Rating (Dropdown) -->
+                        <div class="col-span-full md:col-span-3">
+                            <label for="${item.id}_rating" class="block text-sm font-medium text-gray-700 mb-1">Nilai (1-5)</label>
+                            <select id="${item.id}_rating" name="${item.id}_rating" required 
+                                    class="rating-select w-full p-2.5 border border-blue-400 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm">
+                                <option value="" disabled selected>Pilih Skor</option>
+                                <option value="5">5 - Sangat Baik</option>
+                                <option value="4">4 - Baik</option>
+                                <option value="3">3 - Cukup</option>
+                                <option value="2">2 - Buruk</option>
+                                <option value="1">1 - Sangat Buruk</option>
+                            </select>
+                        </div>
+
+                        <!-- Kolom Status -->
+                        <div class="col-span-full md:col-span-3">
+                            <label for="${item.id}_status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="${item.id}_status" name="${item.id}_status" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm">
+                                <option value="Sesuai">Sesuai</option>
+                                <option value="Tidak Sesuai">Tidak Sesuai</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                        </div>
+
+                        <!-- Kolom Catatan -->
+                        <div class="col-span-full md:col-span-6">
+                            <label for="${item.id}_notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+                            <textarea id="${item.id}_notes" name="${item.id}_notes" rows="1" placeholder="Catatan spesifik untuk item ini" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"></textarea>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+            return html;
+        }
+        
+        // FUNGSI 2: Menghitung dan memperbarui skor rata-rata secara real-time
+        function updateAverageScore() {
+            const ratingInputs = document.querySelectorAll('.rating-select');
+            let totalScore = 0;
+
+            ratingInputs.forEach(select => {
+                const value = parseInt(select.value); 
+                if (!isNaN(value) && value >= 1 && value <= 5) {
+                    totalScore += value;
+                }
+            });
+
+            // Total divisor adalah 7 karena ada 7 item visual
+            const divisor = visualItems.length; 
+            const averageScore = divisor > 0 ? (totalScore / divisor) : 0;
+            
+            // Perbarui tampilan UI
+            document.getElementById('averageScoreDisplay').textContent = averageScore.toFixed(2);
+            
+            // Mengubah warna skor berdasarkan nilainya
+            const scoreDisplay = document.getElementById('averageScoreDisplay');
+            scoreDisplay.className = 'text-4xl font-extrabold px-4 py-2 rounded-lg shadow-inner min-w-[120px] text-right bg-white';
+            if (averageScore >= 4.0) {
+                scoreDisplay.classList.add('text-green-600');
+            } else if (averageScore >= 2.5) {
+                scoreDisplay.classList.add('text-yellow-600');
+            } else {
+                scoreDisplay.classList.add('text-red-600');
+            }
+        }
+
+        // FUNGSI 3: Inisialisasi Firebase dan Otentikasi
+        async function initializeFirebaseAndAuth() {
+            if (!firebaseConfig || !firebaseConfig.projectId) {
+                console.error("Kesalahan: Konfigurasi Firebase tidak ada. Harap ganti placeholder MY_FIREBASE_CONFIG di dalam kode.");
+                outputMessage.textContent = "Gagal memulai: Harap isi konfigurasi Firebase Anda (API Key, Project ID, dll.)";
+                outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300');
+                outputMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+                return;
+            }
+
+            try {
+                setLogLevel('debug');
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Otentikasi
+                if (initialAuthToken) {
+                    // Ini hanya berfungsi di lingkungan Canvas
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    // Ini adalah default untuk hosting statis (seperti GitHub Pages)
+                    await signInAnonymously(auth);
+                }
+
+                // Tunggu otentikasi selesai
+                await new Promise(resolve => {
+                    const unsubscribe = onAuthStateChanged(auth, (user) => {
+                        if (user) {
+                            userId = user.uid;
+                            console.log("Firebase Auth berhasil. User ID:", userId);
+                        } else {
+                            // Jika token gagal, user ID akan tetap menjadi anonim.
+                            userId = auth.currentUser?.uid || `anon-${crypto.randomUUID()}`;
+                        }
+                        unsubscribe();
+                        resolve();
+                    });
+                });
+
+                // 1. Memuat semua item review visual
+                visualReviewContainer.innerHTML = visualItems.map(generateReviewItem).join('');
+                
+                // 2. Pasang listener untuk pembaruan skor real-time
+                document.querySelectorAll('.rating-select').forEach(select => {
+                    select.addEventListener('change', updateAverageScore);
+                });
+                
+                // Panggil sekali untuk memastikan tampilan skor awal
+                updateAverageScore();
+                
+                // 3. Pasang listener untuk pengiriman formulir
+                reviewForm.addEventListener('submit', handleSubmit);
+                
+            } catch (error) {
+                console.error("Kesalahan saat inisialisasi Firebase atau otentikasi:", error);
+            }
+        }
+
+        // FUNGSI 4: Menangani Pengiriman Formulir dan Penyimpanan Data ke Firestore
+        async function handleSubmit(event) {
+            event.preventDefault(); 
+            
+            if (!userId || !db) {
+                console.error("Pengguna belum diautentikasi atau Firebase belum siap.");
+                outputMessage.textContent = "Gagal mengirim: Harap tunggu sebentar sampai sistem siap atau muat ulang.";
+                outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300');
+                outputMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+                outputMessage.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            // Hitung skor akhir sebelum pengiriman
+            updateAverageScore();
+            const finalAverageScore = document.getElementById('averageScoreDisplay').textContent;
+            
+            const formData = new FormData(reviewForm);
+            const reviewData = {
+                // Metadata
+                timestamp: new Date(),
+                reviewerId: userId,
+                averageScore: parseFloat(finalAverageScore),
+
+                // Kategori I
+                visualReview: [],
+                
+                // Kategori II
+                documentReview: {
+                    item: 'Kelengkapan Dokumen COA',
+                    status: formData.get('doc_coa_status'),
+                    notes: formData.get('doc_coa_notes')
+                },
+
+                // Kategori III
+                recommendation: formData.get('recommendation'),
+                recommendationNotes: formData.get('recommendation_notes')
+            };
+
+            // Mengumpulkan data Review Visual (I)
+            visualItems.forEach(item => {
+                const id = item.id;
+                reviewData.visualReview.push({
+                    item: item.name,
+                    rating: formData.get(`${id}_rating`),
+                    status: formData.get(`${id}_status`),
+                    notes: formData.get(`${id}_notes`)
+                });
+            });
+
+            try {
+                // Path koleksi untuk menyimpan data pribadi: artifacts/{appId}/users/{userId}/sack_reviews
+                // Catatan: Karena kita menggunakan signInAnonymously, semua pengguna memiliki ID unik mereka sendiri.
+                const collectionPath = `artifacts/${appId}/users/${userId}/sack_reviews`;
+                
+                await addDoc(collection(db, collectionPath), reviewData);
+
+                // 1. Tampilkan di Konsol (simulasi pengiriman ke server)
+                console.log('--- DATA REVIEW BERHASIL DISIMPAN KE FIRESTORE ---');
+                console.log(JSON.stringify(reviewData, null, 2));
+
+                // 2. Tampilkan pesan sukses ke pengguna
+                outputMessage.textContent = `Review berhasil dikirim dan disimpan! Skor: ${finalAverageScore}. Rekomendasi: ${reviewData.recommendation}.`;
+                reviewForm.reset(); // Reset formulir setelah sukses
+                updateAverageScore(); // Reset skor rata-rata
+                outputMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'border-red-300');
+                outputMessage.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
+                outputMessage.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) {
+                console.error("Kesalahan saat menambahkan dokumen ke Firestore: ", e);
+                outputMessage.textContent = `Gagal menyimpan data ke Firestore: ${e.message}`;
+                outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300');
+                outputMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+                outputMessage.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        initializeFirebaseAndAuth();
+
+    </script>
+</body>
+</html>
