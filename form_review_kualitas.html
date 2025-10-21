@@ -13,7 +13,7 @@
         /* Menggunakan font Inter */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #fcba03; /* Light blue background */
+            background-color: #99bf0d; /* Light blue background */
         }
     </style>
 </head>
@@ -466,11 +466,11 @@
             const reviewDataForFirestore = { ...reviewData, visualReview: JSON.parse(reviewData.visualReview) };
 
             // --- Mulai Proses Simpan Tiga Arah ---
-            let firestoreResult, docResult, sheetResult;
+            let firestoreResult = {}, docResult = {}, sheetResult = {};
 
             // 1. Simpan ke Firestore
             try {
-                const collectionPath = `artifacts/${appId}/private/sack_reviews`; // Path yang lebih umum
+                const collectionPath = `artifacts/${appId}/users/${userId}/sack_reviews`; // FIX: Path diperbaiki
                 await addDoc(collection(db, collectionPath), reviewDataForFirestore);
                 firestoreResult = { success: true };
                 console.log('Data berhasil disimpan ke Firestore.');
@@ -491,25 +491,27 @@
             let finalMessage = "";
             let colorClass = "";
 
-            if (firestoreResult.success && docResult.docSuccess && sheetResult.success) {
+            // Evaluasi status keberhasilan dengan aman
+            const isFirestoreSuccess = firestoreResult?.success ?? false;
+            const isDocSuccess = docResult?.docSuccess ?? false;
+            const isSheetSuccess = sheetResult?.success ?? false;
+
+            if (isFirestoreSuccess && isDocSuccess && isSheetSuccess) {
                 finalMessage = `✅ SUKSES! Data disimpan ke Firebase, Google Sheet, dan laporan dibuat.`;
                 if(docResult.finalDocLink) {
                     finalMessage += ` <a href="${docResult.finalDocLink}" target="_blank" class="text-blue-700 underline font-bold hover:text-blue-900">Lihat Google Doc</a>`;
                 }
                 colorClass = 'bg-green-100 text-green-700 border-green-300';
-            } else {
+            } else if (isFirestoreSuccess) {
                 let errorMessages = [];
-                if (!firestoreResult.success) errorMessages.push(firestoreResult.message);
-                if (!sheetResult?.success) errorMessages.push(sheetResult.message);
-                if (!docResult?.docSuccess) errorMessages.push(docResult.message);
+                if (!isSheetSuccess) errorMessages.push(sheetResult?.message || 'Gagal mengirim ke Google Sheet.');
+                if (!isDocSuccess) errorMessages.push(docResult?.message || 'Gagal membuat Google Doc.');
                 
-                finalMessage = `⚠️ SEBAGIAN GAGAL: Data berhasil disimpan ke Firebase, tetapi terjadi masalah lain. Detail: ${errorMessages.join(', ')}`;
+                finalMessage = `⚠️ SEBAGIAN GAGAL: Data berhasil disimpan ke Firebase, tetapi terjadi masalah lain. Detail: ${errorMessages.join(' ')}`;
                 colorClass = 'bg-yellow-100 text-yellow-700 border-yellow-300';
-
-                if (!firestoreResult.success) {
-                     finalMessage = `❌ SEMUA GAGAL! Tidak dapat menyimpan data ke Firebase. Error: ${firestoreResult.message}`;
-                     colorClass = 'bg-red-100 text-red-700 border-red-300';
-                }
+            } else {
+                 finalMessage = `❌ SEMUA GAGAL! Tidak dapat menyimpan data ke Firebase. Error: ${firestoreResult?.message || 'Unknown Firestore error.'}`;
+                 colorClass = 'bg-red-100 text-red-700 border-red-300';
             }
             
             outputMessage.innerHTML = finalMessage;
@@ -529,3 +531,4 @@
     </script>
 </body>
 </html>
+
