@@ -338,7 +338,7 @@
             }
 
             try {
-                // setLogLevel('debug'); // Uncomment ini untuk debugging
+                setLogLevel('debug'); // DI AKTIFKAN UNTUK MENDAPATKAN DETAIL ERROR!
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
