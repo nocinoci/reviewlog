@@ -19,20 +19,60 @@
     <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-3xl">
         <header class="mb-8 border-b-4 border-blue-600 pb-4">
             <h1 class="text-4xl font-black text-gray-800">
-                Formulir Review Kualitas Sampel Karung 
+                Formulir Penilaian Kualitas Sampel Karung Terigu
             </h1>
             <p class="text-gray-600 mt-2">
                 Lengkapi ulasan dengan skor dan rekomendasi untuk sampel yang diperiksa.
             </p>
+            <!-- INDIKATOR STATUS SISTEM (BARU) -->
+            <div id="systemStatus" class="text-sm text-center text-yellow-800 p-2 bg-yellow-100 rounded-lg mt-4 shadow-md">
+                Sistem sedang menyiapkan koneksi Firebase... Harap tunggu sebentar.
+            </div>
         </header>
 
         <!-- Form Utama -->
         <form id="reviewForm" class="space-y-12">
 
+            <!-- BAGIAN HEADER/METADATA BARU -->
+            <section id="metadataInputs" class="space-y-4 p-6 border border-gray-200 rounded-xl bg-gray-50 shadow-inner">
+                <h2 class="text-xl font-extrabold text-gray-700">Detail Sampel</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Produk -->
+                    <div>
+                        <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">Produk</label>
+                        <input type="text" id="product_name" name="product_name" required placeholder="Nama Produk Karung"
+                               class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <!-- Supplier/Pencetak -->
+                    <div>
+                        <label for="supplier_name" class="block text-sm font-medium text-gray-700 mb-1">Supplier/Pencetak</label>
+                        <input type="text" id="supplier_name" name="supplier_name" required placeholder="Nama Supplier atau Pencetak"
+                               class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <!-- Tanggal Penerimaan Sampel -->
+                    <div>
+                        <label for="sample_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Penerimaan Sampel</label>
+                        <input type="date" id="sample_date" name="sample_date" required
+                               class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <!-- Reviewer (Nama Orang yang Review) -->
+                    <div>
+                        <label for="reviewer_name" class="block text-sm font-medium text-gray-700 mb-1">Reviewer</label>
+                        <input type="text" id="reviewer_name" name="reviewer_name" required placeholder="Nama Anda"
+                               class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </section>
+            <!-- AKHIR BAGIAN HEADER/METADATA -->
+
             <!-- KATEGORI I: REVIEW VISUAL -->
             <section class="space-y-6 p-6 border border-gray-200 rounded-xl shadow-lg bg-white">
                 <h2 class="text-2xl font-extrabold text-blue-700 border-b pb-2">
-                    I. Review Visual (Nilai 1-5)
+                    I. Review Visual dan Teknis Kemasan
                 </h2>
 
                 <!-- Bagian A, B, C akan menggunakan fungsi generateReviewItem -->
@@ -49,15 +89,15 @@
                 </h2>
                 
                 <div class="p-6 bg-green-50 rounded-xl shadow-md border-2 border-green-200">
-                    <h3 class="font-bold text-lg text-green-800 mb-3">8. Kelengkapan Dokumen COA</h3>
+                    <h3 class="font-bold text-lg text-green-800 mb-3">8. Kelengkapan Dokumen COA (Certificate of Analysis)</h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Status Kelengkapan -->
                         <div>
                             <label for="doc_coa_status" class="block text-sm font-medium text-gray-700 mb-1">Status Dokumen</label>
                             <select id="doc_coa_status" name="doc_coa_status" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 bg-white">
-                                <option value="Ada">Ada</option>
-                                <option value="Tidak Ada">Tidak Ada</option>
+                                <option value="Ada">Ya</option>
+                                <option value="Tidak Ada">Tidak</option>
                             </select>
                         </div>
                         
@@ -73,7 +113,7 @@
 
             <!-- CARD SKOR RATA-RATA -->
             <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-lg shadow-xl flex justify-between items-center transition duration-300 hover:bg-blue-100 mx-auto max-w-full">
-                <p class="text-lg font-bold text-blue-800">SKOR RATA-RATA VISUAL AKHIR (I. Review Visual):</p>
+                <p class="text-lg font-bold text-blue-800">TOTAL NILAI RATA-RATA (Bagian I):</p>
                 <span id="averageScoreDisplay" class="text-4xl font-extrabold text-blue-900 bg-white px-4 py-2 rounded-lg shadow-inner min-w-[120px] text-right">0.00</span>
             </div>
 
@@ -81,7 +121,7 @@
             <!-- KATEGORI III: REKOMENDASI DAN TINDAK LANJUT -->
             <section class="space-y-4 pt-6 border-t border-gray-300">
                 <h2 class="text-2xl font-extrabold text-orange-700 border-b pb-2">
-                    III. Rekomendasi dan Tindak Lanjut
+                    III. Rekomendasi & Tindak Lanjut
                 </h2>
 
                 <div class="p-6 bg-orange-50 rounded-xl shadow-md border-2 border-orange-200">
@@ -89,21 +129,21 @@
                         
                         <!-- Rekomendasi (Dropdown) -->
                         <div>
-                            <label for="recommendation_status" class="block text-sm font-medium text-gray-700 mb-1">Pilih Rekomendasi</label>
+                            <label for="recommendation_status" class="block text-sm font-medium text-gray-700 mb-1">Rekomendasi</label>
                             <select id="recommendation_status" name="recommendation" required
                                     class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 bg-white">
                                 <option value="" disabled selected>-- Pilih Tindak Lanjut --</option>
-                                <option value="Diterima">Diterima</option>
+                                <option value="Lolos">Lolos</option>
                                 <option value="Diterima dengan catatan">Diterima dengan catatan</option>
                                 <option value="Revisi">Revisi</option>
-                                <option value="Ditolak">Ditolak</option>
+                                <option value="Tolak">Tolak</option>
                             </select>
                         </div>
                         
                         <!-- Catatan -->
                         <div class="md:col-span-2">
-                            <label for="recommendation_notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan Rekomendasi</label>
-                            <textarea id="recommendation_notes" name="recommendation_notes" rows="2" placeholder="Catatan spesifik untuk rekomendasi ini (Wajib diisi jika Revisi/Ditolak)" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"></textarea>
+                            <label for="recommendation_notes" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Tindak Lanjut</label>
+                            <textarea id="recommendation_notes" name="recommendation_notes" rows="2" placeholder="Deskripsi tindak lanjut atau catatan spesifik" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"></textarea>
                         </div>
                     </div>
                 </div>
@@ -111,7 +151,7 @@
             </section>
 
             <!-- Tombol Kirim -->
-            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition duration-300 shadow-xl mt-8">
+            <button type="submit" id="submitButton" disabled class="w-full bg-gray-400 text-white font-bold py-3 rounded-xl mt-8 cursor-not-allowed">
                 KIRIMKAN REVIEW & SIMPAN DATA
             </button>
         </form>
@@ -137,8 +177,9 @@
             storageBucket: "reviewlog-90ece.firebasestorage.app",
             messagingSenderId: "817094832497",
             appId: "1:817094832497:web:24f99fb36b3e1883f9c6d0",
-            // BARU: URL WEB APP GAS UNTUK MENYIMPAN KE GOOGLE SHEET
-            googleSheetWebAppUrl: "GANTI_DENGAN_URL_WEB_APP_ANDA" 
+            // <--- GANTI BAGIAN INI DENGAN URL WEB APP GAS GOOGLE SHEET ANDA
+            googleSheetWebAppUrl: "https://script.google.com/macros/s/AKfycbyvH6ihucsb78Uveat7Uzd2ITd-FX0AobcP84S6XSx_9CD7fBJcMJglKa52-bTy8KUa/exec" 
+            // --->
         };
         // =========================================================================
         
@@ -149,17 +190,23 @@
 
         let db, auth, userId = null;
 
+        // Mendapatkan referensi ke elemen baru
+        const submitButton = document.getElementById('submitButton');
+        const systemStatus = document.getElementById('systemStatus');
+
+
         // Array yang berisi semua item review visual
         const visualItems = [
-            { id: 'design_fit', num: '1.', group: 'A. Desain dan Kualitas Cetak', name: 'Kesesuaian Desain', criteria: 'Perbandingan sampel fisik terhadap artwork desain yang disetujui (ukuran, elemen, layout)' },
-            { id: 'print_quality', num: '2.', group: 'A. Desain dan Kualitas Cetak', name: 'Kualitas Cetak', criteria: 'Ketajaman hasil cetak/objek/teks, ada tidaknya cacat cetak (noda, luntur, dotgain, mirik, begelombang)' },
+            // Disesuaikan berdasarkan dokumen terlampir
+            { id: 'design_fit', num: '1.', group: 'A. DESAIN & KUALITAS CETAK', name: 'Kesesuaian Desain', criteria: 'Perbandingan langsung sampel fisik terhadap file artwork desain yang disetujui (posisi logo, elemen, tata letak).' },
+            { id: 'print_quality', num: '2.', group: 'A. DESAIN & KUALITAS CETAK', name: 'Kualitas Cetak', criteria: 'Ketajaman hasil cetak/objek/teks, tidak ada cacat cetak (smudge, dot gain, miring, bergelombang).' },
             
-            { id: 'text_fit', num: '3.', group: 'B. Teks dan Tulisan', name: 'Keseuaian Teks dan Angka', criteria: 'Kesesuaian teks dan angka pada sampel dengan spesifikasi.' },
-            { id: 'readability', num: '4.', group: 'B. Teks dan Tulisan', name: 'Keterbacaan', criteria: 'Keterbacaan huruf dan angka, terutama pada teks kecil.' },
+            { id: 'text_fit', num: '3.', group: 'B. TEXT (Tulisan)', name: 'Kesesuaian Teks & Angka', criteria: 'Semua tulisan (informasi produk, berat, izin, dll.) dan angka dicetak sesuai draf akhir.' },
+            { id: 'readability', num: '4.', group: 'B. TEXT (Tulisan)', name: 'Keterbacaan (Legibility)', criteria: 'Tulisan mudah terbaca, teks dan angka tercetak baik tidak menempel dengan kiri kanannya atau terdistorsi.' },
             
-            { id: 'color_std', num: '5.', group: 'C. TONE WARNA', name: 'Tone Warna Standard', criteria: 'Kesesuaian tone warna sampel dengan warna standard yang disetujui.' },
-            { id: 'color_min', num: '6.', group: 'C. TONE WARNA', name: 'Toleransi Tone Minimum', criteria: 'Hasil cetak tidak lebih muda/tipis dari batas toleransi minimum.' },
-            { id: 'color_max', num: '7.', group: 'C. TONE WARNA', name: 'Toleransi Tone Maksimum', criteria: 'Hasil cetak tidak lebih tua/pekat dari batas toleransi maksimum.' },
+            { id: 'color_std', num: '5.', group: 'C. TONE WARNA (COLOR MATCHING)', name: 'Tone Warna Standard', criteria: 'Warna standar dibandingkan dengan sampel fisik/standar warna yang disetujui (mid-tone) untuk semua elemen cetak dan dasar karung.' },
+            { id: 'color_min', num: '6.', group: 'C. TONE WARNA (COLOR MATCHING)', name: 'Toleransi Tone Minimum', criteria: 'Warna elemen cetak atau dasar harus berada di atas tone warna minimum yang masih dapat diterima (tidak terlalu pudar/terang).' },
+            { id: 'color_max', num: '7.', group: 'C. TONE WARNA (COLOR MATCHING)', name: 'Toleransi Tone Maksimum', criteria: 'Warna elemen cetak atau dasar harus berada di bawah tone warna maksimum yang masih dapat diterima (tidak terlalu pekat/gelap).' },
         ];
 
         const visualReviewContainer = document.getElementById('visualReviewItems');
@@ -182,13 +229,13 @@
             html += `
                 <div class="p-4 bg-white rounded-xl shadow-md border border-gray-100 transition duration-150 hover:shadow-lg">
                     <h4 class="font-bold text-base text-gray-800 mb-1">${item.num} ${item.name}</h4>
-                    <p class="text-xs text-gray-500 mb-4 italic">Kriteria: ${item.criteria}</p>
+                    <p class="text-xs text-gray-500 mb-4 italic">Kriteria Pengukuran: ${item.criteria}</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                         
-                        <!-- Kolom Rating (Dropdown) -->
+                        <!-- Kolom Rating (Nilai Aktual 1-5) -->
                         <div class="col-span-full md:col-span-3">
-                            <label for="${item.id}_rating" class="block text-sm font-medium text-gray-700 mb-1">Nilai (1-5)</label>
+                            <label for="${item.id}_rating" class="block text-sm font-medium text-gray-700 mb-1">Nilai Aktual (1-5)</label>
                             <select id="${item.id}_rating" name="${item.id}_rating" required 
                                     class="rating-select w-full p-2.5 border border-blue-400 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm">
                                 <option value="" disabled selected>Pilih Skor</option>
@@ -200,13 +247,13 @@
                             </select>
                         </div>
 
-                        <!-- Kolom Status -->
+                        <!-- Kolom Status (Sesuai/Mendekati/Tidak Sesuai) -->
                         <div class="col-span-full md:col-span-3">
                             <label for="${item.id}_status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <select id="${item.id}_status" name="${item.id}_status" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm">
                                 <option value="Sesuai">Sesuai</option>
+                                <option value="Mendekati">Mendekati</option>
                                 <option value="Tidak Sesuai">Tidak Sesuai</option>
-                                <option value="N/A">N/A</option>
                             </select>
                         </div>
 
@@ -269,13 +316,24 @@
             
             // 3. Pasang listener untuk pengiriman formulir
             reviewForm.addEventListener('submit', handleSubmit);
+            
+            // Tampilkan status loading awal dan nonaktifkan tombol
+            systemStatus.classList.remove('hidden');
+            submitButton.disabled = true;
+            submitButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitButton.classList.add('bg-gray-400', 'cursor-not-allowed');
 
             if (!firebaseConfig || !firebaseConfig.projectId) {
                 console.error("Kesalahan: Konfigurasi Firebase tidak ada. Harap ganti placeholder MY_FIREBASE_CONFIG di dalam kode.");
                 // Tetap render UI, tetapi beri peringatan
                 outputMessage.textContent = "Peringatan: Konfigurasi Firebase TIDAK LENGKAP. Data tidak akan tersimpan.";
                 outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300');
-                outputMessage.classList.add('bg-yellow-100', 'text-yellow-700', 'border-yellow-300');
+                outputMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+                
+                systemStatus.textContent = "Koneksi Firebase GAGAL: Konfigurasi tidak lengkap.";
+                systemStatus.classList.remove('bg-yellow-100', 'text-yellow-800');
+                systemStatus.classList.add('bg-red-100', 'text-red-800');
+                
                 return;
             }
 
@@ -299,6 +357,13 @@
                     const unsubscribe = onAuthStateChanged(auth, (user) => {
                         if (user) {
                             userId = user.uid;
+                            
+                            // Sukses: Aktifkan tombol dan sembunyikan status
+                            submitButton.disabled = false;
+                            submitButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                            submitButton.classList.add('bg-blue-600', 'hover:bg-blue-700', 'shadow-xl');
+                            systemStatus.classList.add('hidden');
+                            
                             console.log("Firebase Auth berhasil. User ID:", userId);
                         } else {
                             // Jika token gagal, user ID akan tetap menjadi anonim.
@@ -311,6 +376,11 @@
                 
             } catch (error) {
                 console.error("Kesalahan saat inisialisasi Firebase atau otentikasi:", error);
+                
+                systemStatus.textContent = "Gagal menyambung ke Firebase. Lihat konsol.";
+                systemStatus.classList.remove('bg-yellow-100', 'text-yellow-800');
+                systemStatus.classList.add('bg-red-100', 'text-red-800');
+                submitButton.disabled = true;
             }
         }
 
@@ -318,15 +388,10 @@
         async function handleSubmit(event) {
             event.preventDefault(); 
             
+            // Periksa apakah Firebase sudah siap sebelum mencoba menyimpan
             if (!userId || !db) {
-                // Periksa apakah Firebase sudah siap sebelum mencoba menyimpan
-                if (firebaseConfig.projectId) {
-                    console.error("Pengguna belum diautentikasi atau Firebase belum siap.");
-                    outputMessage.textContent = "Gagal mengirim: Harap tunggu sebentar sampai sistem siap atau muat ulang.";
-                } else {
-                    // Jika konfigurasi tidak ada sama sekali, tampilkan pesan yang lebih jelas
-                    outputMessage.textContent = "Gagal mengirim: Konfigurasi Firebase tidak valid.";
-                }
+                console.error("Pengguna belum diautentikasi atau DB belum siap (Klik terlalu cepat).");
+                outputMessage.textContent = "Gagal mengirim: Harap tunggu sebentar sampai sistem siap atau muat ulang.";
                 
                 outputMessage.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-300', 'bg-yellow-100', 'text-yellow-700', 'border-yellow-300');
                 outputMessage.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
@@ -334,13 +399,22 @@
                 return;
             }
 
+            // Hilangkan pesan output lama
+            outputMessage.classList.add('hidden');
+
             // Hitung skor akhir sebelum pengiriman
             updateAverageScore();
             const finalAverageScore = document.getElementById('averageScoreDisplay').textContent;
             
             const formData = new FormData(reviewForm);
             const reviewData = {
-                // Metadata
+                // Metadata Sampel Baru
+                productName: formData.get('product_name'),
+                supplierName: formData.get('supplier_name'),
+                sampleDate: formData.get('sample_date'),
+                reviewerName: formData.get('reviewer_name'),
+                
+                // Metadata Sistem
                 timestamp: new Date().toISOString(), // Gunakan ISOString untuk memudahkan parsing di GAS
                 reviewerId: userId,
                 averageScore: parseFloat(finalAverageScore),
@@ -393,16 +467,19 @@
                 try {
                     const sheetResponse = await fetch(gasUrl, {
                         method: 'POST',
-                        // mode: 'no-cors' harus digunakan jika GAS endpoint tidak disetel untuk CORS
+                        // mode: 'no-cors' harus digunakan karena GAS adalah layanan eksternal
                         mode: 'no-cors', 
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(reviewData)
                     });
                     // Kita tidak bisa memeriksa status di 'no-cors', jadi asumsikan berhasil jika tidak ada error jaringan.
                     sheetSuccess = true;
-                    console.log("Data berhasil dikirim ke Google Sheet Web App.");
+                    console.log("Data berhasil dikirim ke Google Sheet Web App (Asumsi Berhasil karena no-cors).");
                 } catch (e) {
+                    // Jika ada error jaringan/cors, catch akan menangkapnya
                     console.error("Kesalahan saat mengirim data ke Google Sheet Web App: ", e);
+                    // Peringatan: Karena mode 'no-cors', error di sini biasanya hanya masalah jaringan/CORS, BUKAN 
+                    // kegagalan script GAS itu sendiri. Kami akan memperlakukannya sebagai kegagalan untuk aman.
                 }
             } else {
                 console.warn("Peringatan: URL Web App Google Sheet belum dikonfigurasi. Hanya disimpan ke Firestore.");
@@ -419,7 +496,7 @@
                 message = `Review berhasil disimpan ke FIREBASE, tetapi gagal mengirim ke Google Sheet. Skor: ${finalAverageScore}.`;
                 colorClass = 'bg-yellow-100 text-yellow-700 border-yellow-300';
             } else if (sheetSuccess) {
-                message = `Review berhasil disimpan ke GOOGLE SHEET, tetapi gagal menyimpan ke Firebase. Skor: ${finalAverageScore}.`;
+                message = `Review berhasil dikirim ke GOOGLE SHEET (Asumsi berhasil/mode no-cors), tetapi gagal menyimpan ke Firebase. Skor: ${finalAverageScore}.`;
                 colorClass = 'bg-yellow-100 text-yellow-700 border-yellow-300';
             } else {
                 message = `Gagal menyimpan data (Firebase dan Google Sheet). Harap periksa konfigurasi.`;
@@ -429,8 +506,10 @@
             outputMessage.textContent = message;
             reviewForm.reset(); 
             updateAverageScore(); 
+            // FIX: Menggunakan spread operator (...) dan split(' ') untuk memecah string kelas 
+            // sehingga classList.add() menerima argumen individual.
             outputMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'border-red-300', 'bg-green-100', 'text-green-700', 'border-green-300', 'bg-yellow-100', 'text-yellow-700', 'border-yellow-300');
-            outputMessage.classList.add(colorClass);
+            outputMessage.classList.add(...colorClass.split(' ')); 
             outputMessage.scrollIntoView({ behavior: 'smooth' });
         }
 
